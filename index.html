@@ -4,99 +4,388 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>울산동구보건소 「절주하이소(所)」 의견조사 - 원아구찜</title>
+
+<!-- External Libraries -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
 <style>
-  :root{
-    --primary:#6366f1; --primary2:#8b5cf6; --pink:#ec4899;
-    --bg:#eef1f8; --card:#f4f5fb; --text:#1f2937; --muted:#6b7280; --line:#6366f1;
+  :root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --primary2: #8b5cf6;
+    --pink: #ec4899;
+    --amber: #f59e0b;
+    --amber-light: #fffbeb;
+    --bg: #0f172a;
+    --card-bg: #1e293b;
+    --card: #f8fafc;
+    --text: #1e293b;
+    --muted: #64748b;
+    --line: #6366f1;
   }
-  *{box-sizing:border-box;}
-  body{margin:0;font-family:'Malgun Gothic','맑은 고딕',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
-  .wrap{max-width:720px;margin:0 auto;padding:24px 16px 60px;}
-  h1{text-align:center;color:var(--primary);font-size:24px;margin:18px 0 4px;line-height:1.4;}
-  .subtitle{text-align:center;color:var(--primary2);font-size:18px;font-weight:bold;margin-bottom:18px;}
-  .intro{background:var(--card);border-radius:12px;padding:18px 20px;margin-bottom:8px;font-size:14px;color:#374151;}
-  .intro strong{display:block;margin-bottom:8px;color:#111827;}
-  .divider{border:none;border-top:3px solid var(--primary);margin:18px 0 22px;}
-  .q{background:var(--card);border-left:5px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:18px;}
-  .q-title{font-weight:bold;font-size:15px;margin-bottom:14px;}
-  .q-title .num{color:var(--primary);margin-right:4px;}
-  .note{background:#fff7e0;border-left:4px solid #f5c542;border-radius:6px;padding:10px 12px;font-size:13px;color:#7a5b00;margin-bottom:14px;}
-  .opt{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:13px 16px;margin-bottom:10px;cursor:pointer;font-size:14px;transition:.15s;}
-  .opt:hover{border-color:var(--primary);}
-  .opt input{accent-color:var(--primary);width:18px;height:18px;}
-  .opt.sel{border-color:var(--primary);background:#eef0ff;}
-  input[type=number],textarea{width:100%;border:1px solid #d1d5db;border-radius:10px;padding:13px 14px;font-size:14px;font-family:inherit;background:#fff;}
-  textarea{min-height:120px;resize:vertical;}
-  .num-row{display:flex;align-items:center;gap:8px;}
-  .num-row .unit{font-size:14px;color:var(--muted);white-space:nowrap;}
-  .submit-btn{width:100%;border:none;border-radius:14px;padding:18px;color:#fff;font-size:18px;font-weight:bold;cursor:pointer;margin-top:10px;background:linear-gradient(90deg,var(--primary),var(--primary2));}
-  .submit-btn:hover{opacity:.93;}
-  .stat-bar{margin-top:26px;background:linear-gradient(90deg,var(--primary2),var(--pink));border-radius:12px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;}
-  .stat-bar .pw{color:#fff;font-weight:bold;font-size:16px;}
-  .stat-bar button{background:rgba(255,255,255,.92);border:none;border-radius:8px;padding:8px 14px;font-weight:bold;color:var(--pink);cursor:pointer;font-size:14px;}
-  .thanks{text-align:center;background:var(--card);border-radius:14px;padding:60px 24px;margin-top:30px;}
-  .thanks .check{font-size:54px;}
-  .thanks h2{color:var(--primary);margin:14px 0 6px;}
-  .thanks p{color:var(--muted);}
-  .thanks button{margin-top:20px;background:var(--primary);color:#fff;border:none;border-radius:10px;padding:12px 24px;font-size:15px;cursor:pointer;}
-  .stats-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
-  .stats-head h2{color:var(--primary);margin:0;font-size:22px;}
-  .cards{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;}
-  .card-stat{flex:1;min-width:140px;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;border-radius:12px;padding:18px;}
-  .card-stat .label{font-size:13px;opacity:.9;}
-  .card-stat .val{font-size:30px;font-weight:bold;margin-top:4px;}
-  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;}
-  .toolbar select,.toolbar button{border:1px solid #d1d5db;border-radius:8px;padding:9px 14px;font-size:14px;cursor:pointer;background:#fff;}
-  .toolbar .excel{background:#1d6f42;color:#fff;border:none;font-weight:bold;}
-  .toolbar .back{background:#fff;}
-  table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;font-size:14px;}
-  th,td{padding:11px 12px;text-align:center;border-bottom:1px solid #eef1f8;}
-  th{background:var(--primary);color:#fff;font-weight:600;}
-  tr:nth-child(even) td{background:#fafbff;}
-  .section-title{font-weight:bold;margin:24px 0 10px;color:#374151;font-size:16px;}
-  .hidden{display:none;}
-  .loading{text-align:center;color:var(--muted);padding:30px;}
-  .err{color:#dc2626;font-size:13px;margin-top:8px;text-align:center;}
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', '맑은 고딕', sans-serif;
+    background-color: #f1f5f9;
+    color: var(--text);
+    line-height: 1.6;
+    word-break: keep-all;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+    color: #ffffff;
+    padding: 32px 20px 28px;
+    text-align: center;
+    border-bottom-left-radius: 24px;
+    border-bottom-right-radius: 24px;
+    box-shadow: 0 8px 24px rgba(79, 70, 229, 0.25);
+  }
+
+  .header h1 {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+  }
+
+  .header .store-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(4px);
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 19px;
+    font-weight: 800;
+  }
+
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+
+  .intro {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px 22px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    color: #334155;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    border: 1px solid #e2e8f0;
+  }
+  .intro strong {
+    display: block;
+    margin-bottom: 8px;
+    color: #0f172a;
+    font-size: 15px;
+  }
+
+  .health-slogans {
+    background: linear-gradient(135deg, #eef2ff, #fce7f3);
+    border: 2px dashed #8b5cf6;
+    border-radius: 16px;
+    padding: 16px 18px;
+    margin-bottom: 22px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #4c1d95;
+    line-height: 1.95;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.08);
+  }
+
+  .divider {
+    border: none;
+    border-top: 3px solid var(--primary);
+    margin: 22px 0 26px;
+    border-radius: 2px;
+  }
+
+  .q {
+    background: #ffffff;
+    border-left: 5px solid var(--line);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border-top: 1px solid #f1f5f9;
+    border-right: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .q-title {
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 14px;
+    color: #1e293b;
+    line-height: 1.5;
+  }
+  .q-title .num {
+    color: var(--primary);
+    font-weight: 900;
+    margin-right: 6px;
+  }
+
+  .note {
+    background: #fffbeb;
+    border-left: 4px solid var(--amber);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: #92400e;
+    margin-bottom: 14px;
+    line-height: 1.55;
+  }
+
+  .opt {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #334155;
+    transition: all 0.15s ease;
+  }
+  .opt:hover {
+    border-color: var(--primary);
+    background: #f0f3ff;
+  }
+  .opt input {
+    accent-color: var(--primary);
+    width: 20px;
+    height: 20px;
+  }
+  .opt.sel {
+    border-color: var(--primary);
+    background: #eef2ff;
+    color: #312e81;
+    font-weight: 700;
+  }
+
+  input[type=number], textarea {
+    width: 100%;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #ffffff;
+    transition: border-color 0.2s;
+  }
+  input[type=number]:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  }
+  textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+  .num-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .num-row .unit {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .submit-btn {
+    width: 100%;
+    border: none;
+    border-radius: 16px;
+    padding: 18px;
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-top: 14px;
+    background: linear-gradient(90deg, var(--primary), var(--primary2));
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .submit-btn:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+  }
+
+  .stat-bar {
+    margin-top: 32px;
+    background: linear-gradient(90deg, var(--primary2), var(--pink));
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 14px rgba(236, 72, 153, 0.25);
+  }
+  .stat-bar .pw {
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 16px;
+  }
+  .stat-bar button {
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    border-radius: 10px;
+    padding: 9px 16px;
+    font-weight: 800;
+    color: var(--pink);
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+  }
+  .stat-bar button:hover {
+    background: #ffffff;
+  }
+
+  .thanks {
+    text-align: center;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 60px 24px;
+    margin-top: 30px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  }
+  .thanks .check { font-size: 60px; margin-bottom: 12px; }
+  .thanks h2 { color: var(--primary); margin: 14px 0 8px; font-size: 24px; }
+  .thanks p { color: var(--muted); font-size: 15px; }
+  .thanks button {
+    margin-top: 24px;
+    background: var(--primary);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .stats-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+  .stats-head h2 { color: var(--primary); margin: 0; font-size: 22px; }
+  .cards { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  .card-stat { flex: 1; min-width: 140px; background: linear-gradient(135deg, var(--primary), var(--primary2)); color: #ffffff; border-radius: 14px; padding: 18px; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2); }
+  .card-stat .label { font-size: 13px; opacity: 0.9; }
+  .card-stat .val { font-size: 30px; font-weight: bold; margin-top: 4px; }
+  .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .toolbar select, .toolbar button { border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 16px; font-size: 14px; cursor: pointer; background: #ffffff; font-weight: 600; }
+  .toolbar .excel { background: #16a34a; color: #ffffff; border: none; font-weight: bold; }
+  .toolbar .back { background: #ffffff; color: #475569; }
+  table { width: 100%; border-collapse: collapse; background: #ffffff; border-radius: 12px; overflow: hidden; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  th, td { padding: 12px 14px; text-align: center; border-bottom: 1px solid #f1f5f9; }
+  th { background: var(--primary); color: #ffffff; font-weight: 700; }
+  tr:nth-child(even) td { background: #f8fafc; }
+  .section-title { font-weight: 800; margin: 26px 0 12px; color: #1e293b; font-size: 17px; }
+  .hidden { display: none; }
+  .loading { text-align: center; color: var(--muted); padding: 30px; }
+  .err { color: #dc2626; font-size: 14px; margin-top: 10px; text-align: center; font-weight: 600; }
+  .charts-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 10px; }
+  .chart-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+  .chart-card h4 { margin: 0 0 12px; font-size: 15px; color: #1e293b; font-weight: 700; }
+  .chart-card canvas { max-height: 220px; }
+  .opinion-item { background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid var(--primary); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; font-size: 14px; }
+  .opinion-item .meta { color: var(--muted); font-size: 12px; margin-bottom: 4px; }
+  .opinion-empty { color: var(--muted); font-size: 14px; text-align: center; padding: 16px; }
+  .period-display { background: #eef2ff; border-left: 4px solid var(--primary); border-radius: 10px; padding: 12px 18px; font-size: 15px; font-weight: 800; color: var(--primary); margin-bottom: 18px; }
+  .summary-box { background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid var(--primary2); border-radius: 14px; padding: 20px; font-size: 14px; line-height: 1.9; color: #334155; white-space: pre-line; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+  #chartsSectionTitle, #summarySectionTitle { page-break-before: always; break-before: page; }
+
+  @media (max-width: 480px) {
+    .header { padding: 24px 16px 22px; }
+    .header h1 { font-size: 19px; }
+    .header .store-badge { font-size: 15px; padding: 5px 14px; }
+    .wrap { padding: 18px 12px 50px; }
+    .intro, .health-slogans { padding: 14px 16px; }
+    .q { padding: 16px 18px; }
+    .opt { padding: 12px 14px; font-size: 13px; }
+    .stats-head h2 { font-size: 19px; }
+    .toolbar { flex-direction: column; }
+    .toolbar select, .toolbar button { width: 100%; box-sizing: border-box; text-align: center; }
+    .cards { flex-direction: column; }
+    .card-stat { min-width: 100%; }
+    .card-stat .val { font-size: 26px; }
+    table { font-size: 13px; }
+    th, td { padding: 10px 8px; }
+    .chart-card canvas { max-height: 200px; }
+    .summary-box { padding: 16px; font-size: 13px; }
+  }
+
+  @media print {
+    .header, .toolbar, .stat-bar, #surveyView, #thanksView { display: none !important; }
+    body { background: #ffffff; }
+    .wrap { max-width: 100%; padding: 0; }
+    .card-stat { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .q, .chart-card, .opinion-item, table { break-inside: avoid; }
+  }
 </style>
 </head>
 <body>
+
+<header class="header">
+  <h1>울산광역시 동구보건소 「절주하이소(所)」 의견조사</h1>
+  <div class="store-badge">📍 원아구찜</div>
+</header>
+
 <div class="wrap">
   <div id="surveyView">
-    <h1>울산동구보건소<br>「절주하이소(所)」 의견조사</h1>
-    <div class="subtitle">- 원아구찜 -</div>
     <div class="intro">
       <strong>안녕하십니까? 울산광역시 동구보건소입니다.</strong>
       지역 내 건강한 음주 문화 조성을 위해 운영 중인 「절주하이소(所)」사업의 효과를 파악하고, 향후 개선 방향을 마련하기 위해 설문조사를 실시합니다.<br><br>
       응답 내용은 통계 분석 목적으로만 활용됩니다.
     </div>
-    <hr class="divider">
-    <form id="surveyForm">
 
+    <div class="health-slogans">
+      🦦 3.3.3. 칫솔질 실천(식후 3분이내, 하루3번이상, 3분이상) · 🍶 절주하이소 · 🚭 금연하이소<br>
+      🥗 날씬하이소 · 🩺 자기혈관숫자 알기(혈압·혈당·콜레스테롤)<br>
+      <strong>울산 동구주민분들 모두 건강하이소~!! 🎉</strong>
+    </div>
+
+    <hr class="divider">
+
+    <form id="surveyForm">
       <div class="q">
         <div class="q-title"><span class="num">1.</span>귀하는 울산 동구보건소에서 운영 중인 「절주하이소(所)」 음식점에 대해 들어보거나 참여해 본 적이 있습니까?</div>
         <label class="opt"><input type="radio" name="q1" value="예" required> 예</label>
         <label class="opt"><input type="radio" name="q1" value="아니오"> 아니오</label>
       </div>
+
       <div class="q">
         <div class="q-title"><span class="num">2.</span>귀하의 절주 목표는 몇 병입니까?</div>
         <div class="num-row"><input type="number" name="q2" min="0" placeholder="숫자를 입력하세요"><span class="unit">병</span></div>
       </div>
+
       <div class="q">
         <div class="q-title"><span class="num">3.</span>「절주하이소(所)」에 참여하시고 어떤 혜택을 받으셨습니까?</div>
         <label class="opt"><input type="radio" name="q3" value="주류 할인 5%"> 주류 할인 5%</label>
         <label class="opt"><input type="radio" name="q3" value="음료수 제공"> 음료수 제공</label>
       </div>
+
       <div class="q">
         <div class="q-title"><span class="num">4.</span>귀하의 동행 인원은 몇 명입니까?</div>
         <div class="num-row"><input type="number" name="q4" min="0" placeholder="숫자를 입력하세요"><span class="unit">명</span></div>
       </div>
+
       <div class="q">
         <div class="q-title"><span class="num">5.</span>귀하의 성별은 무엇입니까?</div>
         <label class="opt"><input type="radio" name="q5" value="남자"> 남자</label>
         <label class="opt"><input type="radio" name="q5" value="여자"> 여자</label>
       </div>
+
       <div class="q">
         <div class="q-title"><span class="num">6.</span>귀하의 연령대는 어떻게 되십니까?</div>
         <label class="opt"><input type="radio" name="q6" value="20대"> 20대</label>
@@ -105,17 +394,20 @@
         <label class="opt"><input type="radio" name="q6" value="50대"> 50대</label>
         <label class="opt"><input type="radio" name="q6" value="60대 이상"> 60대 이상</label>
       </div>
+
       <div class="q">
-        <div class="q-title"><span class="num">7.</span>고위험 음주 기준을 알고 계십니까?</div>
+        <div class="q-title"><span class="num">7.</span>고위험 음주 기준을 알고 계십니까? (주 2회 이상, 한 번의 술자리에서 남자는 소주 기준 7잔(또는 맥주 5캔) 이상, 여자는 5잔(또는 맥주 3캔) 이상을 마시는 경우)</div>
         <label class="opt"><input type="radio" name="q7" value="예"> 예</label>
         <label class="opt"><input type="radio" name="q7" value="아니오"> 아니오</label>
       </div>
+
       <div class="q">
         <div class="q-title"><span class="num">8.</span>귀하께서는 평소 본인의 음주 습관이 고위험 음주 양상을 보인다고 생각하십니까?</div>
         <div class="note">※ 고위험 음주 기준: 주 2회 이상, 1회 남자 7잔 이상 / 여자 5잔 이상(소주 기준)</div>
         <label class="opt"><input type="radio" name="q8" value="예"> 예</label>
         <label class="opt"><input type="radio" name="q8" value="아니오"> 아니오</label>
       </div>
+
       <div class="q">
         <div class="q-title"><span class="num">9.</span>「절주하이소(所)」에 참여하시는 주된 이유는 무엇입니까?</div>
         <label class="opt"><input type="radio" name="q9" value="음주량 관리(절주)를 위해"> 음주량 관리(절주)를 위해</label>
@@ -123,12 +415,14 @@
         <label class="opt"><input type="radio" name="q9" value="가족을 위해"> 가족을 위해</label>
         <label class="opt"><input type="radio" name="q9" value="주변 권유"> 주변 권유</label>
       </div>
+
       <div class="q">
         <div class="q-title"><span class="num">10.</span>「절주하이소(所)」 참여가 본인의 음주 습관 개선에 도움이 되었습니까?</div>
         <label class="opt"><input type="radio" name="q10" value="그렇다"> 그렇다</label>
         <label class="opt"><input type="radio" name="q10" value="보통이다"> 보통이다</label>
         <label class="opt"><input type="radio" name="q10" value="그렇지 않다"> 그렇지 않다</label>
       </div>
+
       <div class="q">
         <div class="q-title"><span class="num">11.</span>향후 「절주하이소(所)」 사업에 다시 참여할 의향이 있습니까?</div>
         <label class="opt"><input type="radio" name="q11" value="그렇다"> 그렇다</label>
@@ -144,6 +438,7 @@
       <button type="submit" class="submit-btn">📝 설문 제출하기</button>
       <div class="err" id="submitErr"></div>
     </form>
+
     <div class="stat-bar">
       <span class="pw">📊 통계 보기</span>
       <button type="button" onclick="openStats()">통계 보기</button>
@@ -161,22 +456,40 @@
 
   <div id="statsView" class="hidden">
     <div class="stats-head"><h2>📊 원아구찜 실적 통계</h2></div>
+    <div class="period-display">📅 조회 기간: <span id="periodDisplay">전체</span></div>
     <div class="toolbar">
-      <select id="yearSelect" onchange="renderStats()"></select>
-      <button class="excel" onclick="exportExcel()">📥 엑셀 다운로드 (3시트)</button>
+      <select id="yearSelect" onchange="renderStats();renderCharts();renderOpinions();renderSummary();"></select>
+      <select id="monthSelect" onchange="renderCharts();renderOpinions();renderSummary();">
+        <option value="">전체(연간)</option>
+        <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option>
+        <option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
+        <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option>
+        <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+      </select>
+      <button class="excel" onclick="exportExcel()">📥 엑셀 다운로드 (선택 기간)</button>
+      <button class="excel" style="background:#111827;" onclick="window.print()">🖨️ PDF로 저장 (선택 기간)</button>
       <button class="back" onclick="backToSurvey()">← 설문으로</button>
     </div>
     <div class="cards">
       <div class="card-stat"><div class="label">전체 응답 수 (누적)</div><div class="val" id="totalCount">-</div></div>
       <div class="card-stat"><div class="label">선택 연도 응답 수</div><div class="val" id="yearCount">-</div></div>
+      <div class="card-stat"><div class="label">선택 기간(연도+월) 응답 수</div><div class="val" id="periodCount">-</div></div>
     </div>
     <div class="section-title">📅 월별 실적 (<span id="yearLabel"></span>년)</div>
     <table><thead><tr><th>월</th><th>응답 수</th></tr></thead><tbody id="monthlyBody"></tbody></table>
-    <div class="section-title">📈 연도별 전체 실적 (~2035년)</div>
+    <div class="section-title">📈 연도별 전체 실적</div>
     <table><thead><tr><th>연도</th><th>응답 수</th></tr></thead><tbody id="yearlyBody"></tbody></table>
+    <div class="section-title" id="chartsSectionTitle">📊 문항별 응답 분포 (<span id="periodLabel"></span>)</div>
+    <div id="chartsWrap" class="charts-grid"></div>
+    <div class="section-title">📝 주관식 의견 (<span id="periodLabel2"></span>)</div>
+    <div id="opinionsWrap"></div>
+    <div class="section-title" id="summarySectionTitle">🧾 종합평가</div>
+    <div id="summaryWrap" class="summary-box"></div>
+    <div style="text-align:center;margin-top:24px;"><button class="back" onclick="backToSurvey()">← 설문으로 돌아가기</button></div>
     <div id="statsLoading" class="loading">데이터를 불러오는 중...</div>
   </div>
 </div>
+
 <script>
   const SUPABASE_URL = 'https://yzycbpugeswycjouldmd.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6eWNicHVnZXN3eWNqb3VsZG1kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0MjUwNzQsImV4cCI6MjA5MjAwMTA3NH0.cuXYGebhnaljK6tyYqNR14QfdH2hj7fR7nTHYTtnLZM';
@@ -187,26 +500,26 @@
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   let allRows = [];
 
-  document.querySelectorAll('.opt input').forEach(inp=>{
-    inp.addEventListener('change',()=>{
-      document.querySelectorAll('input[name="'+inp.name+'"]').forEach(s=>s.closest('.opt').classList.remove('sel'));
+  document.querySelectorAll('.opt input').forEach(inp => {
+    inp.addEventListener('change', () => {
+      document.querySelectorAll('input[name="' + inp.name + '"]').forEach(s => s.closest('.opt').classList.remove('sel'));
       inp.closest('.opt').classList.add('sel');
     });
   });
 
-  document.getElementById('surveyForm').addEventListener('submit', async (e)=>{
+  document.getElementById('surveyForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const f = e.target;
     const errBox = document.getElementById('submitErr');
-    errBox.textContent='';
+    errBox.textContent = '';
     const has = n => !!f.elements[n];
     const get = n => has(n) ? (f.elements[n].value || '').trim() : '';
     const payload = {
       restaurant: RESTAURANT,
       q1_heard: get('q1') || null,
-      q2_goal_bottles: get('q2') ? parseInt(get('q2'),10) : null,
+      q2_goal_bottles: get('q2') ? parseInt(get('q2'), 10) : null,
       q3_benefit: get('q3') || null,
-      q4_companions: get('q4') ? parseInt(get('q4'),10) : null,
+      q4_companions: get('q4') ? parseInt(get('q4'), 10) : null,
       q5_gender: get('q5') || null,
       q6_age: get('q6') || null,
       q7_know_highrisk: get('q7') || null,
@@ -225,97 +538,277 @@
     if(error){ errBox.textContent = '제출 중 오류가 발생했습니다: ' + error.message; return; }
     document.getElementById('surveyView').classList.add('hidden');
     document.getElementById('thanksView').classList.remove('hidden');
-    window.scrollTo(0,0);
+    window.scrollTo(0, 0);
   });
 
-  function resetSurvey(){
+  function resetSurvey() {
     document.getElementById('surveyForm').reset();
-    document.querySelectorAll('.opt.sel').forEach(o=>o.classList.remove('sel'));
+    document.querySelectorAll('.opt.sel').forEach(o => o.classList.remove('sel'));
     document.getElementById('thanksView').classList.add('hidden');
     document.getElementById('surveyView').classList.remove('hidden');
-    window.scrollTo(0,0);
+    window.scrollTo(0, 0);
   }
 
-  async function openStats(){
+  async function openStats() {
     const pw = prompt('비밀번호를 입력하세요');
     if(pw === null) return;
     if(pw !== STATS_PW){ alert('비밀번호가 올바르지 않습니다.'); return; }
     document.getElementById('surveyView').classList.add('hidden');
     document.getElementById('statsView').classList.remove('hidden');
-    window.scrollTo(0,0);
+    window.scrollTo(0, 0);
     await loadData();
   }
-  function backToSurvey(){
+  function backToSurvey() {
     document.getElementById('statsView').classList.add('hidden');
     document.getElementById('surveyView').classList.remove('hidden');
-    window.scrollTo(0,0);
+    window.scrollTo(0, 0);
   }
 
-  async function loadData(){
+  async function loadData() {
     const ld = document.getElementById('statsLoading');
-    ld.textContent='데이터를 불러오는 중...'; ld.style.display='block';
-    const { data, error } = await sb.from(TABLE).select('*').eq('restaurant', RESTAURANT).order('created_at',{ascending:true});
-    if(error){ ld.textContent='불러오기 오류: ' + error.message; return; }
+    ld.textContent = '데이터를 불러오는 중...'; ld.style.display = 'block';
+    const { data, error } = await sb.from(TABLE).select('*').eq('restaurant', RESTAURANT).order('created_at', { ascending: true });
+    if(error){ ld.textContent = '불러오기 오류: ' + error.message; return; }
     allRows = data || [];
-    ld.style.display='none';
+    ld.style.display = 'none';
     const sel = document.getElementById('yearSelect');
     const nowY = new Date().getFullYear();
-    const startY = Math.min(nowY, 2026);
-    sel.innerHTML='';
-    for(let y=startY; y<=2035; y++){ const o=document.createElement('option'); o.value=y; o.textContent=y+'년'; sel.appendChild(o); }
-    sel.value = nowY <= 2035 ? nowY : 2035;
-    renderStats();
+    const yearsSet = new Set(); allRows.forEach(r => { if(r.created_at) yearsSet.add(new Date(r.created_at).getFullYear()); }); yearsSet.add(nowY); const years = Array.from(yearsSet).sort((a,b) => a-b);
+    sel.innerHTML = '';
+    years.forEach(y => { const o = document.createElement('option'); o.value = y; o.textContent = y + '년'; sel.appendChild(o); });
+    sel.value = nowY;
+    renderStats(); renderCharts(); renderOpinions(); renderSummary();
   }
 
-  function renderStats(){
-    const year = parseInt(document.getElementById('yearSelect').value,10);
+  function renderStats() {
+    const year = parseInt(document.getElementById('yearSelect').value, 10);
     document.getElementById('yearLabel').textContent = year;
     document.getElementById('totalCount').textContent = allRows.length.toLocaleString();
     const monthly = new Array(12).fill(0);
     const yearly = {}; let yearTotal = 0;
-    allRows.forEach(r=>{
+    allRows.forEach(r => {
       if(!r.created_at) return;
       const d = new Date(r.created_at); const y = d.getFullYear();
-      yearly[y] = (yearly[y]||0)+1;
+      yearly[y] = (yearly[y] || 0) + 1;
       if(y === year){ monthly[d.getMonth()]++; yearTotal++; }
     });
     document.getElementById('yearCount').textContent = yearTotal.toLocaleString();
-    const mb = document.getElementById('monthlyBody'); mb.innerHTML='';
-    for(let m=0;m<12;m++){ mb.insertAdjacentHTML('beforeend', '<tr><td>'+(m+1)+'월</td><td>'+monthly[m].toLocaleString()+'</td></tr>'); }
-    const yb = document.getElementById('yearlyBody'); yb.innerHTML='';
-    let startY = Math.min(...Object.keys(yearly).map(Number), 2026);
-    if(!isFinite(startY)) startY = 2026;
-    for(let y=startY; y<=2035; y++){ yb.insertAdjacentHTML('beforeend', '<tr><td>'+y+'년</td><td>'+((yearly[y]||0)).toLocaleString()+'</td></tr>'); }
+    const mb = document.getElementById('monthlyBody'); mb.innerHTML = '';
+    for(let m = 0; m < 12; m++){ mb.insertAdjacentHTML('beforeend', '<tr><td>' + (m+1) + '월</td><td>' + monthly[m].toLocaleString() + '개</td></tr>'); }
+    const yb = document.getElementById('yearlyBody'); yb.innerHTML = '';
+    let yearsWithData = Object.keys(yearly).map(Number).filter(y => yearly[y] > 0);
+    if(!yearsWithData.includes(year)) yearsWithData.push(year); yearsWithData.sort((a,b) => a-b);
+    yearsWithData.forEach(y => { yb.insertAdjacentHTML('beforeend', '<tr><td>' + y + '년</td><td>' + ((yearly[y] || 0)).toLocaleString() + '개</td></tr>'); });
   }
 
-  function exportExcel(){
-    if(!allRows.length){ alert('내보낼 데이터가 없습니다.'); return; }
+  function getFilteredRows() {
+    const year = parseInt(document.getElementById('yearSelect').value, 10);
+    const monthSel = document.getElementById('monthSelect').value;
+    return allRows.filter(r => {
+      if(!r.created_at) return false;
+      const d = new Date(r.created_at);
+      if(d.getFullYear() !== year) return false;
+      if(monthSel !== '' && (d.getMonth() + 1) !== parseInt(monthSel, 10)) return false;
+      return true;
+    });
+  }
+
+  function periodText() {
+    const year = document.getElementById('yearSelect').value;
+    const monthSel = document.getElementById('monthSelect').value;
+    return monthSel === '' ? (year + '년 전체') : (year + '년 ' + monthSel + '월');
+  }
+
+  const CHART_COLORS = ['#ef4444','#3b82f6','#10b981','#f59e0b','#8b5cf6','#ec4899','#06b6d4','#84cc16','#f97316','#14b8a6','#a855f7','#eab308','#6366f1'];
+  let chartInstances = [];
+
+  function pct(n, total) { return total ? Math.round(n / total * 100) : 0; }
+
+  function renderCharts() {
+    const filtered = getFilteredRows();
+    document.getElementById('periodCount').textContent = filtered.length.toLocaleString();
+    document.getElementById('periodLabel').textContent = periodText();
+    const pd = document.getElementById('periodDisplay');
+    if(pd) pd.textContent = periodText();
+    chartInstances.forEach(c => c.destroy());
+    chartInstances = [];
+    const wrap = document.getElementById('chartsWrap');
+    wrap.innerHTML = '';
+    const qs = [
+      {key:'q1_heard', title:'1. 절주하이소 인지/참여 경험'},
+      {key:'q3_benefit', title:'3. 받은 혜택'},
+      {key:'q5_gender', title:'5. 성별'},
+      {key:'q6_age', title:'6. 연령대'},
+      {key:'q7_know_highrisk', title:'7. 고위험 음주 기준 인지'},
+      {key:'q8_self_highrisk', title:'8. 본인 고위험 음주 여부'},
+      {key:'q9_reason', title:'9. 참여 주된 이유'},
+      {key:'q10_improve', title:'10. 음주습관 개선 도움'},
+      {key:'q11_rejoin', title:'11. 향후 재참여 의향'}
+    ];
+    if(HAS_DIET) {
+      qs.push({key:'q_diet_select', title:'12. 날씬하이소 메뉴 선택'});
+      qs.push({key:'q_diet_obesity', title:'13. 비만예방 도움'});
+    }
+    qs.forEach((q, qi) => {
+      const counts = {};
+      filtered.forEach(r => {
+        const v = r[q.key];
+        if(v !== null && v !== undefined && v !== '') { counts[v] = (counts[v] || 0) + 1; }
+      });
+      const labels = Object.keys(counts);
+      const card = document.createElement('div');
+      card.className = 'chart-card';
+      const h4 = document.createElement('h4');
+      h4.textContent = q.title;
+      card.appendChild(h4);
+      if(!labels.length) {
+        const empty = document.createElement('div');
+        empty.className = 'opinion-empty';
+        empty.textContent = '응답 없음';
+        card.appendChild(empty);
+        wrap.appendChild(card);
+        return;
+      }
+      const canvas = document.createElement('canvas');
+      card.appendChild(canvas);
+      wrap.appendChild(card);
+      const chart = new Chart(canvas.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: '응답 수',
+            data: labels.map(l => counts[l]),
+            backgroundColor: labels.map((l, li) => CHART_COLORS[(qi + li) % CHART_COLORS.length])
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+      });
+      chartInstances.push(chart);
+    });
+  }
+
+  function renderOpinions() {
+    const filtered = getFilteredRows();
+    document.getElementById('periodLabel2').textContent = periodText();
+    const wrap = document.getElementById('opinionsWrap');
+    wrap.innerHTML = '';
+    const items = filtered.filter(r => r.q12_opinion && r.q12_opinion.trim());
+    if(!items.length) {
+      wrap.innerHTML = '<div class="opinion-empty">등록된 주관식 의견이 없습니다.</div>';
+      return;
+    }
+    items.slice().reverse().forEach(r => {
+      const div = document.createElement('div');
+      div.className = 'opinion-item';
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.textContent = r.created_at ? new Date(r.created_at).toLocaleString('ko-KR') : '';
+      const text = document.createElement('div');
+      text.textContent = r.q12_opinion;
+      div.appendChild(meta);
+      div.appendChild(text);
+      wrap.appendChild(div);
+    });
+  }
+
+  function renderSummary() {
+    const filtered = getFilteredRows();
+    const total = filtered.length;
+    const sw = document.getElementById('summaryWrap');
+    if(!sw) return;
+    if(!total) {
+      sw.textContent = '해당 기간에 집계된 응답이 없습니다.';
+      return;
+    }
+    const pctCalc = (n, t) => t ? Math.round(n / t * 100) : 0;
+    function topAnswer(key) {
+      const counts = {};
+      let answered = 0;
+      filtered.forEach(r => {
+        const v = r[key];
+        if(v !== null && v !== undefined && v !== '') {
+          counts[v] = (counts[v] || 0) + 1;
+          answered++;
+        }
+      });
+      const entries = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+      if(!entries.length) return null;
+      return { label: entries[0][0], count: entries[0][1], pct: pctCalc(entries[0][1], answered), answered: answered };
+    }
+    const qDefs = [
+      {key:'q1_heard', title:'절주하이소 인지도'},
+      {key:'q3_benefit', title:'혜택 인지'},
+      {key:'q5_gender', title:'성별 분포'},
+      {key:'q6_age', title:'연령대 분포'},
+      {key:'q7_know_highrisk', title:'고위험 음주 기준 인지도'},
+      {key:'q8_self_highrisk', title:'본인 고위험 음주 자각'},
+      {key:'q9_reason', title:'참여 주된 이유'},
+      {key:'q10_improve', title:'음주습관 개선 도움 인식'},
+      {key:'q11_rejoin', title:'재참여 의향'}
+    ];
+    if(HAS_DIET) {
+      qDefs.push({key:'q_diet_select', title:'날씬하이소 메뉴 선택 경험'});
+      qDefs.push({key:'q_diet_obesity', title:'비만예방 도움 인식'});
+    }
+    let lines = [];
+    lines.push('■ 조사 개요');
+    lines.push('- 조사기간: ' + periodText());
+    lines.push('- 총 응답 건수: ' + total.toLocaleString() + '건');
+    lines.push('');
+    lines.push('■ 문항별 주요 응답');
+    qDefs.forEach(q => {
+      const t = topAnswer(q.key);
+      if(t) lines.push('- ' + q.title + ': "' + t.label + '" ' + t.count + '명 (' + t.pct + '%)');
+      else lines.push('- ' + q.title + ': 응답 없음');
+    });
+    lines.push('');
+    lines.push('■ 종합 평가');
+    const hr = topAnswer('q7_know_highrisk');
+    const imp = topAnswer('q10_improve');
+    const rej = topAnswer('q11_rejoin');
+    let ev = [];
+    if(hr) ev.push('고위험 음주 기준에 대해서는 응답자의 ' + hr.pct + '%가 "' + hr.label + '"이라고 답하여 관련 인지도를 보여주었습니다.');
+    if(imp) ev.push('절주하이소 참여가 음주습관 개선에 도움이 되었는지에 대해서는 "' + imp.label + '" 응답이 ' + imp.pct + '%로 가장 많았습니다.');
+    if(rej) ev.push('향후 재참여 의향에 대해서는 "' + rej.label + '" 응답이 ' + rej.pct + '%를 차지했습니다.');
+    ev.push('이상의 결과는 절주하이소(所) 사업의 성과를 점검하고 향후 개선 방향을 수립하는 데 참고 자료로 활용할 수 있습니다.');
+    lines.push(ev.join(' '));
+    sw.textContent = lines.join(String.fromCharCode(10));
+  }
+
+  function exportExcel() {
+    const rows_ = getFilteredRows();
+    if(!rows_.length){ alert('선택한 기간(' + periodText() + ')에 내보낼 데이터가 없습니다.'); return; }
     const wb = XLSX.utils.book_new();
     let header = ['번호','응답일시','식당','1.인지/참여','2.절주목표(병)','3.혜택','4.동행인원(명)','5.성별','6.연령대','7.고위험기준 인지','8.본인 고위험 여부','9.참여이유','10.개선도움','11.재참여의향'];
     if(HAS_DIET){ header = header.concat(['12.날씬하이소 선택','13.비만예방 도움']); }
     header.push('자유의견');
-    const rows = allRows.map((r,i)=>{
-      const base = [i+1, r.created_at?new Date(r.created_at).toLocaleString('ko-KR'):'', r.restaurant||'',
-        r.q1_heard||'', r.q2_goal_bottles??'', r.q3_benefit||'', r.q4_companions??'',
-        r.q5_gender||'', r.q6_age||'', r.q7_know_highrisk||'', r.q8_self_highrisk||'',
-        r.q9_reason||'', r.q10_improve||'', r.q11_rejoin||''];
-      if(HAS_DIET){ base.push(r.q_diet_select||'', r.q_diet_obesity||''); }
-      base.push(r.q12_opinion||'');
+    const rows = rows_.map((r,i) => {
+      const base = [i+1, r.created_at ? new Date(r.created_at).toLocaleString('ko-KR') : '', r.restaurant || '',
+        r.q1_heard || '', r.q2_goal_bottles ?? '', r.q3_benefit || '', r.q4_companions ?? '',
+        r.q5_gender || '', r.q6_age || '', r.q7_know_highrisk || '', r.q8_self_highrisk || '',
+        r.q9_reason || '', r.q10_improve || '', r.q11_rejoin || ''];
+      if(HAS_DIET){ base.push(r.q_diet_select || '', r.q_diet_obesity || ''); }
+      base.push(r.q12_opinion || '');
       return base;
     });
     const ws1 = XLSX.utils.aoa_to_sheet([header, ...rows]);
-    ws1['!cols'] = header.map((h,i)=>({wch: i===header.length-1?40:(i===1?20:14)}));
+    ws1['!cols'] = header.map((h,i) => ({wch: i === header.length-1 ? 40 : (i === 1 ? 20 : 14)}));
     XLSX.utils.book_append_sheet(wb, ws1, '총데이터');
 
     const summary = [];
     summary.push(['「절주하이소(所)」 의견조사 요약','']);
     summary.push(['식당', RESTAURANT]);
-    summary.push(['전체 응답 수', allRows.length]);
+    summary.push(['선택 기간', periodText()]); summary.push(['선택 기간 응답 수', rows_.length]); summary.push(['전체 누적 응답 수', allRows.length]);
     summary.push(['생성일', new Date().toLocaleString('ko-KR')]);
     summary.push(['','']);
-    const countBy = (key)=>{ const m={}; allRows.forEach(r=>{ const v=r[key]; if(v!==null&&v!==undefined&&v!=='') m[v]=(m[v]||0)+1; }); return m; };
-    const addCat = (title,key)=>{ summary.push([title,'응답 수']); const m=countBy(key); const ks=Object.keys(m);
-      if(!ks.length) summary.push(['(응답 없음)','']); ks.forEach(k=>summary.push([k,m[k]])); summary.push(['','']); };
+    const countBy = (key) => { const m = {}; rows_.forEach(r => { const v = r[key]; if(v !== null && v !== undefined && v !== '') m[v] = (m[v] || 0) + 1; }); return m; };
+    const addCat = (title,key) => { summary.push([title,'응답 수']); const m = countBy(key); const ks = Object.keys(m);
+      if(!ks.length) summary.push(['(응답 없음)','']); ks.forEach(k => summary.push([k,m[k]])); summary.push(['','']); };
     addCat('1. 절주하이소 인지/참여 경험','q1_heard');
     addCat('3. 받은 혜택','q3_benefit');
     addCat('5. 성별','q5_gender');
@@ -326,30 +819,30 @@
     addCat('10. 음주습관 개선 도움','q10_improve');
     addCat('11. 향후 재참여 의향','q11_rejoin');
     if(HAS_DIET){ addCat('12. 날씬하이소 메뉴 선택','q_diet_select'); addCat('13. 비만예방 도움','q_diet_obesity'); }
-    const avg = (key)=>{ const v=allRows.map(r=>r[key]).filter(x=>typeof x==='number'); return v.length?(v.reduce((a,b)=>a+b,0)/v.length).toFixed(1):'-'; };
+    const avg = (key) => { const v = rows_.map(r => r[key]).filter(x => typeof x === 'number'); return v.length ? (v.reduce((a,b) => a + b, 0) / v.length).toFixed(1) : '-'; };
     summary.push(['항목','값']);
     summary.push(['2. 평균 절주 목표(병)', avg('q2_goal_bottles')]);
     summary.push(['4. 평균 동행 인원(명)', avg('q4_companions')]);
     summary.push(['','']);
-    const yearly={}; const mby={};
-    allRows.forEach(r=>{ if(!r.created_at)return; const d=new Date(r.created_at); const y=d.getFullYear();
-      yearly[y]=(yearly[y]||0)+1; const ym=y+'-'+String(d.getMonth()+1).padStart(2,'0'); mby[ym]=(mby[ym]||0)+1; });
-    summary.push(['연도별 실적','응답 수']);
-    Object.keys(yearly).sort().forEach(y=>summary.push([y+'년', yearly[y]]));
+    const yearly = {}; const mby = {};
+    allRows.forEach(r => { if(!r.created_at) return; const d = new Date(r.created_at); const y = d.getFullYear();
+      yearly[y] = (yearly[y] || 0) + 1; const ym = y + '-' + String(d.getMonth() + 1).padStart(2, '0'); mby[ym] = (mby[ym] || 0) + 1; });
+    summary.push(['연도별 실적(전체 누적)','응답 수']);
+    Object.keys(yearly).sort().forEach(y => summary.push([y + '년', yearly[y]]));
     summary.push(['','']);
-    summary.push(['월별 실적','응답 수']);
-    Object.keys(mby).sort().forEach(ym=>summary.push([ym, mby[ym]]));
-    const ws2 = XLSX.utils.aoa_to_sheet(summary); ws2['!cols']=[{wch:30},{wch:16}];
+    summary.push(['월별 실적(전체 누적)','응답 수']);
+    Object.keys(mby).sort().forEach(ym => summary.push([ym, mby[ym]]));
+    const ws2 = XLSX.utils.aoa_to_sheet(summary); ws2['!cols'] = [{wch: 30}, {wch: 16}];
     XLSX.utils.book_append_sheet(wb, ws2, '요약');
 
     const subj = [['번호','응답일시','자유의견']];
-    allRows.forEach((r,i)=>{ if(r.q12_opinion && r.q12_opinion.trim()) subj.push([i+1, r.created_at?new Date(r.created_at).toLocaleString('ko-KR'):'', r.q12_opinion]); });
-    if(subj.length===1) subj.push(['','','(주관식 응답 없음)']);
-    const ws3 = XLSX.utils.aoa_to_sheet(subj); ws3['!cols']=[{wch:8},{wch:20},{wch:70}];
+    rows_.forEach((r, i) => { if(r.q12_opinion && r.q12_opinion.trim()) subj.push([i+1, r.created_at ? new Date(r.created_at).toLocaleString('ko-KR') : '', r.q12_opinion]); });
+    if(subj.length === 1) subj.push(['','','(주관식 응답 없음)']);
+    const ws3 = XLSX.utils.aoa_to_sheet(subj); ws3['!cols'] = [{wch: 8}, {wch: 20}, {wch: 70}];
     XLSX.utils.book_append_sheet(wb, ws3, '주관식');
 
-    const today = new Date().toISOString().slice(0,10);
-    XLSX.writeFile(wb, RESTAURANT+'_절주하이소_실적_'+today+'.xlsx');
+    const today = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(wb, RESTAURANT + '_절주하이소_' + periodText().replace(/\s/g, '') + '_' + today + '.xlsx');
   }
 </script>
 </body>
